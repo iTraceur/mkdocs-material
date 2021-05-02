@@ -137,7 +137,14 @@ const assets$ = concat(
     .map(pattern => copyAll(pattern, {
       from: "src",
       to: base
-    }))
+    })),
+
+    /* Copy fonts */
+    ...["assets/fonts/*"]
+      .map(pattern => copyAll(pattern, {
+        from: "src",
+        to: base
+      }))
 )
 
 /* ------------------------------------------------------------------------- */
