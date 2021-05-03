@@ -1,0 +1,21 @@
+.md-typeset img {
+  display: block;
+  margin: 0 auto;
+}
+
+[data-md-color-scheme="slate"] .md-header {
+  background-color: rgb(30, 32, 41);
+  border-bottom: .05rem solid var(--md-primary-fg-color);
+}
+
+[data-md-color-scheme="slate"] .md-tabs {
+  background-color: rgba(86, 101, 149, 0.1);
+}
+
+[data-md-color-scheme="slate"] .md-tabs__link--active {
+    color: var(--md-primary-fg-color);
+}
+
+[data-md-color-scheme="slate"] .md-tabs__link:hover {
+    color: var(--md-accent-fg-color);
+}

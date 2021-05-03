@@ -19,41 +19,56 @@
 # IN THE SOFTWARE.
 
 # Language for theme localization
-language: en
+language: zh
 
 # Text direction (can be ltr or rtl), default: ltr
 direction:
 
 # Feature flags for functionality that alters behavior significantly, and thus
 # may be a matter of taste
-features: []
+features:
+  - search.highlight
+  # - navigation.instant
+  - navigation.tabs
+  - navigation.top
+  - navigation.expand
 
 # Sets the primary and accent color palettes as defined in the Material Design
 # documentation - possible values can be looked up in the getting started guide
 palette:
-
-  # Primary color used for header, sidebar and links, default: indigo
-  primary:
-
-  # Accent color for highlighting user interaction, default: indigo
-  accent:
+  palette:
+    - scheme: default
+      # Primary color used for header, sidebar and links, default: indigo
+      primary: indigo
+      # Accent color for highlighting user interaction, default: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - scheme: slate
+      primary: light blue
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
 
 # Fonts used by Material, automatically loaded from Google Fonts - see the site
 # for a list of available fonts
 font:
-
   # Default font for text
   text: Roboto
-
   # Fixed-width font for code listings
   code: Roboto Mono
 
 # From Material 5.x on, icons are inlined into the HTML and CSS as SVGs. Some
 # icons that are part of the HTML can be configured and replaced
 icon:
+  logo: logo
 
 # Favicon to be rendered
-favicon: assets/images/favicon.png
+favicon: assets/images/favicon.ico
+
+logo: assets/images/logo.png
 
 # Material includes the search in the header as a partial, not as a separate
 # template, so it's correct that search.html is missing

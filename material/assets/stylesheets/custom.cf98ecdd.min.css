@@ -1,0 +1,2 @@
+@-webkit-keyframes heart{0%,40%,80%,to{transform:scale(1)}20%,60%{transform:scale(1.15)}}@keyframes heart{0%,40%,80%,to{transform:scale(1)}20%,60%{transform:scale(1.15)}}.heart{-webkit-animation:heart 1.5s infinite;animation:heart 1.5s infinite;color:red}
+/*# sourceMappingURL=custom.cf98ecdd.min.css.map */

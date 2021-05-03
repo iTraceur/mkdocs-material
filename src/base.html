@@ -111,6 +111,7 @@
       {% if config.theme.font != false %}
         {% set font = config.theme.font %}
         <link rel="stylesheet" href="{{ 'assets/stylesheets/roboto-fonts.css' | url }}">
+        <link rel="stylesheet" href="{{ 'assets/stylesheets/custom.css' | url }}">
         <style>
           :root {
             --md-text-font-family: "{{ font.text }}";

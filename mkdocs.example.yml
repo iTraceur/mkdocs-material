@@ -1,0 +1,221 @@
+# Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+# Project information
+site_name: Material for MkDocs
+site_url: https://squidfunk.github.io/mkdocs-material/
+site_author: Martin Donath
+site_description: >-
+  Create a branded static site from a set of Markdown files to host the
+  documentation of your Open Source or commercial project – customizable,
+  searchable, mobile-friendly, 40+ languages
+
+# Repository
+repo_name: squidfunk/mkdocs-material
+repo_url: https://github.com/squidfunk/mkdocs-material
+edit_uri: ""
+
+# Copyright
+copyright: Copyright &copy; 2016 - 2021 Martin Donath
+
+# Configuration
+theme:
+  name: null
+  custom_dir: material
+
+  # Language for theme localization
+  language: zh
+
+  # Text direction (can be ltr or rtl), default: ltr
+  direction:
+
+  # Feature flags for functionality that alters behavior significantly, and thus
+  # may be a matter of taste
+  features:
+    - search.highlight
+    # - navigation.instant
+    - navigation.tabs
+    - navigation.top
+    - navigation.expand
+
+  # Sets the primary and accent color palettes as defined in the Material Design
+  # documentation - possible values can be looked up in the getting started guide
+  palette:
+    palette:
+      - scheme: default
+        # Primary color used for header, sidebar and links, default: indigo
+        primary: indigo
+        # Accent color for highlighting user interaction, default: indigo
+        accent: indigo
+        toggle:
+          icon: material/weather-sunny
+          name: Switch to dark mode
+      - scheme: slate
+        primary: light blue
+        accent: blue
+        toggle:
+          icon: material/weather-night
+          name: Switch to light mode
+
+  # Fonts used by Material, automatically loaded from Google Fonts - see the site
+  # for a list of available fonts
+  font:
+    # Default font for text
+    text: Roboto
+    # Fixed-width font for code listings
+    code: Roboto Mono
+
+  # From Material 5.x on, icons are inlined into the HTML and CSS as SVGs. Some
+  # icons that are part of the HTML can be configured and replaced
+  icon:
+    logo: logo
+
+  # Favicon to be rendered
+  favicon: assets/images/favicon.ico
+
+  logo: assets/images/logo.png
+
+  # Material includes the search in the header as a partial, not as a separate
+  # template, so it's correct that search.html is missing
+  include_search_page: false
+
+  # Material doesn't use MkDocs search functionality but provides its own. For
+  # this reason, only the search index needs to be built
+  search_index_only: true
+
+  # Static pages to build
+  static_templates:
+    - 404.html
+
+# Plugins
+plugins:
+  - search:
+      separator: '[\s\-\.]+'
+      min_search_length: 4
+      lang: ['en','ja']
+  - minify:
+      minify_html: true
+
+# Customization
+extra:
+  version: 1.0
+  generator:
+      name: squidfunk
+      link: https://squidfunk.github.io/mkdocs-material/
+  social:
+      - icon: fontawesome/brands/github
+        link: https://github.com/squidfunk
+        name: github page
+
+extra_css:
+  - assets/css/dark-theme.css
+
+extra_javascript:
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - abbr
+  - attr_list
+  - def_list
+  - footnotes
+  - meta
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:pymdownx.emoji.to_png
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist
+  - pymdownx.tilde
+  - smarty
+
+# Page tree
+nav:
+  - Home: index.md
+  - Getting started:
+    - Installation: getting-started.md
+    - Creating your site: creating-your-site.md
+    - Publishing your site: publishing-your-site.md
+    - Customization: customization.md
+    - Troubleshooting: troubleshooting.md
+    - Data privacy: data-privacy.md
+    - License: license.md
+    - Releases:
+      - Changelog: changelog.md
+      - Upgrade guide: upgrading.md
+      - Deprecations: deprecations.md
+  - Setup:
+    - Changing the colors: setup/changing-the-colors.md
+    - Changing the fonts: setup/changing-the-fonts.md
+    - Changing the language: setup/changing-the-language.md
+    - Changing the logo and icons: setup/changing-the-logo-and-icons.md
+    - Setting up navigation: setup/setting-up-navigation.md
+    - Setting up site search: setup/setting-up-site-search.md
+    - Setting up site analytics: setup/setting-up-site-analytics.md
+    - Setting up tags: setup/setting-up-tags.md
+    - Setting up versioning: setup/setting-up-versioning.md
+    - Setting up the header: setup/setting-up-the-header.md
+    - Setting up the footer: setup/setting-up-the-footer.md
+    - Adding a git repository: setup/adding-a-git-repository.md
+    - Adding a comment system: setup/adding-a-comment-system.md
+  - Reference:
+    - Abbreviations: reference/abbreviations.md
+    - Admonitions: reference/admonitions.md
+    - Buttons: reference/buttons.md
+    - Code blocks: reference/code-blocks.md
+    - Content tabs: reference/content-tabs.md
+    - Data tables: reference/data-tables.md
+    - Diagrams: reference/diagrams.md
+    - Footnotes: reference/footnotes.md
+    - Formatting: reference/formatting.md
+    - Icons + Emojis: reference/icons-emojis.md
+    - Images: reference/images.md
+    - Lists: reference/lists.md
+    - MathJax: reference/mathjax.md
+    - Meta tags: reference/meta-tags.md
+    - Variables: reference/variables.md
+  - Insiders:
+    - Sponsorship: insiders/index.md
+    - Getting started:
+      - Installation: insiders/getting-started.md
+      - Changelog: insiders/changelog.md
+
+# Google Analytics
+google_analytics:
+  - !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+  - auto
