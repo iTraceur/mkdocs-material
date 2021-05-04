@@ -291,7 +291,7 @@ const index$ = zip(icons$, emojis$)
       } as IconSearchIndex
     }),
     switchMap(data => write(
-      `${base}/overrides/assets/javascripts/iconsearch_index.json`,
+      `${base}/assets/js/iconsearch_index.json`,
       JSON.stringify(data)
     ))
   )

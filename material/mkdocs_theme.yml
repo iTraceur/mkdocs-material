@@ -27,8 +27,7 @@ direction:
 # Feature flags for functionality that alters behavior significantly, and thus
 # may be a matter of taste
 features:
-  - search.highlight
-  # - navigation.instant
+  - navigation.instant
   - navigation.tabs
   - navigation.top
   - navigation.expand
