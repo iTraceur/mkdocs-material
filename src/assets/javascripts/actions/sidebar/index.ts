@@ -33,7 +33,7 @@
 export function setSidebarOffset(
   el: HTMLElement, value: number
 ): void {
-  el.style.top = `${value}px`
+  el.style.top = `${value || 53}px`
 }
 
 /**
