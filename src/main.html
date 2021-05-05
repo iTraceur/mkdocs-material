@@ -30,10 +30,15 @@
   />
 {% endblock %}
 
+<!-- Custom comment system integration -->
+{% block disqus %}
+  {% include "partials/integrations/twikoo.html" %}
+{% endblock %}
+
 <!-- Theme-related JavaScript -->
 {% block scripts %}
   {{ super() }}
-
+  
   <!-- Extra JavaScript -->
   <script src="{{ 'overrides/assets/javascripts/bundle.js' | url }}"></script>
 {% endblock %}
