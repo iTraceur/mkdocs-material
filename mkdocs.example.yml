@@ -123,6 +123,10 @@ extra:
       - icon: fontawesome/brands/github
         link: https://github.com/squidfunk
         name: github page
+    twikoo:
+      env_id: twikoo-ID
+    baidu_analytics:
+      token: baidu-analytics-token
 
 extra_css:
   - assets/css/dark-theme.css

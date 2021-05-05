@@ -137,8 +137,11 @@
 
     <!-- Analytics -->
     {% block analytics %}
-      {% if config.google_analytics %}
+      {% if config.google_analytics is sequence %}
         {% include "partials/integrations/analytics.html" %}
+      {% endif %}
+      {% if config.extra.baidu_analytics and config.extra.baidu_analytics is mapping %}
+        {% include "partials/integrations/baidu_analytics.html" %}
       {% endif %}
     {% endblock %}
 
