@@ -48,6 +48,7 @@
 
     // Icon search input
     .md-input {
+      height: 2.5rem;
       background: var(--md-default-bg-color);
       box-shadow: 0 0 px2rem(12px) hsla(0, 0%, 0%, 0.07);
 
@@ -87,7 +88,7 @@
     // Icon search result metadata
     &__meta {
       position: absolute;
-      top: px2rem(8px);
+      top: px2rem(16px);
       right: px2rem(12px);
       color: var(--md-default-fg-color--lighter);
       font-size: px2rem(12.8px);
