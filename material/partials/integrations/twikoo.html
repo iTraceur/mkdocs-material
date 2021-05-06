@@ -5,8 +5,8 @@
 {% if page and page.meta and page.meta.twikoo is mapping %}
   {% set twikoo = page.meta.twikoo %}
 {% endif %}
-{% if not page.is_homepage and twikoo.display != false %}
-<script src="https://cdn.jsdelivr.net/npm/twikoo@1.3.0/dist/twikoo.all.min.js"></script>
+{% if not page.is_homepage and twikoo and twikoo.display != false %}
+  <script src="https://cdn.jsdelivr.net/npm/twikoo@1.3.0/dist/twikoo.all.min.js"></script>
   <h2 style="margin-bottom:1.33em">
     <span class="twemoji">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">

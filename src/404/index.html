@@ -22,10 +22,32 @@
 
 {% extends "main.html" %}
 
+<!-- Navigation -->
+{% block site_nav %}{% endblock %}
+
 <!-- Content -->
 {% block content %}
-  <h1>404 - Not found</h1>
+  <div class="not-found">
+    <p class="not-found-text">page not found</p>
+    <div class="not-found-tips">
+      <div class="not-found-tips-body">
+        <div class="not-found-left-arm not-found-arm"></div>
+        <div class="not-found-face">
+          <div class="not-found-upper-face">
+            <div class="not-found-element">4</div>
+            <div class="not-found-element">0</div>
+            <div class="not-found-element">4</div></div>
+          <div class="not-found-mouth"></div>
+        </div>
+        <div class="not-found-right-arm not-found-arm"></div>
+      </div>
+    </div>
+    <p>maybe you want to go
+      <a href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}"><b>back?</b></a>
+    </p>
+  </div>
 {% endblock %}
 
 <!-- Disqus integration -->
 {% block disqus %}{% endblock %}
+
