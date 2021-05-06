@@ -2,6 +2,10 @@
   This file was automatically generated - do not edit
 -#}
 {% extends "main.html" %}
+{% block styles %}
+  {{ super() }}
+  <style>@media screen and (min-width:60em){.md-sidebar--secondary{display:none}}@media screen and (min-width:76.25em){.md-sidebar--primary{display:none}}</style>
+{% endblock %}
 {% block content %}
   <div class="not-found">
     <p class="not-found-text">page not found</p>
