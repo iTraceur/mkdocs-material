@@ -107,11 +107,12 @@ theme:
 # Plugins
 plugins:
   - search:
-      separator: '[\s\-\.]+'
-      min_search_length: 4
+      separator: '[\s\-\.、，。？！；：“”《》（）〈〉`]+'
+      #min_search_length: 4
       lang: ['en','ja']
   - minify:
       minify_html: true
+  - git-revision-date-localized
 
 # Customization
 extra:
