@@ -133,25 +133,32 @@ const assets$ = concat(
     })),
 
   /* Copy images and configurations */
-  ...[".icons/*.svg", "assets/images/*", "overrides/assets/images/*", "**/*.{py,yml}"]
+  ...[".icons/*.svg", "assets/images/*", "**/*.{py,yml}"]
     .map(pattern => copyAll(pattern, {
       from: "src",
       to: base
     })),
 
-    /* Copy fonts */
-    ...["assets/fonts/*"]
-      .map(pattern => copyAll(pattern, {
-        from: "src",
-        to: base
-      })),
+  /* Copy fonts */
+  ...["assets/fonts/*"]
+    .map(pattern => copyAll(pattern, {
+      from: "src",
+      to: base
+    })),
 
-      /* Copy css and js */
-      ...["assets/css/*", "assets/js/*", "overrides/assets/css/*", "overrides/assets/js/*"]
-        .map(pattern => copyAll(pattern, {
-          from: "src",
-          to: base
-        }))
+  /* Copy custom css and js */
+  ...["assets/css/*", "assets/js/*"]
+    .map(pattern => copyAll(pattern, {
+      from: "src",
+      to: base
+    })),
+
+  /* Copy overrides */
+  ...["overrides/assets/images/*", "overrides/assets/css/*", "overrides/assets/js/*"]
+    .map(pattern => copyAll(pattern, {
+      from: "src",
+      to: base
+    }))
 )
 
 /* ------------------------------------------------------------------------- */
@@ -291,7 +298,7 @@ const index$ = zip(icons$, emojis$)
       } as IconSearchIndex
     }),
     switchMap(data => write(
-      `${base}/overrides/assets/js/iconsearch_index.json`,
+      `${base}/overrides/assets/javascripts/iconsearch_index.json`,
       JSON.stringify(data)
     ))
   )
