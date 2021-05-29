@@ -172,10 +172,15 @@
                   {% endif %}
                 {% endif %}
               {% endblock %}
-              {% if page and page.meta and page.meta.page_nav %}
-                {% set hidden = true if "content" not in page.meta.page_nav %}
+              {% set twikoo = config.extra.twikoo %}
+              {% if page and page.meta and page.meta.twikoo is mapping %}
+                {% set twikoo = page.meta.twikoo %}
               {% endif %}
-              {% if not hidden and not page.is_homepage and (page.previous_page or page.next_page) %}
+              {% set hidden_content_next_prev = not twikoo or twikoo.display == false %}
+              {% if page and page.meta and page.meta.page_nav %}
+                {% set hidden_content_next_prev = true if "content" not in page.meta.page_nav %}
+              {% endif %}
+              {% if not hidden_content_next_prev and not page.is_homepage and (page.previous_page or page.next_page) %}
                 <br>
                 <hr>
                 <nav class="md-footer__inner md-grid" aria-label="{{ lang.t('footer.title') }}">
