@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+# Copyright (c) 2016-2022 Martin Donath <martin.donath@squidfunk.com>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
@@ -22,25 +22,28 @@ import json
 from setuptools import setup, find_packages
 
 # Load package.json contents
-with open("package.json") as data:
-    package = json.load(data)
+with open("package.json") as f:
+    package = json.load(f)
 
 # Load list of dependencies
-with open("requirements.txt") as data:
+with open("requirements.txt") as f:
     install_requires = [
-        line for line in data.read().split("\n")
+        line for line in f.read().split("\n")
         if line and not line.startswith("#")
     ]
 
 # Load README contents
-with open("README.md", encoding = "utf-8") as data:
-    long_description = data.read()
+with open("README.md", encoding = "utf-8") as f:
+    long_description = f.read()
 
 # Package description
 setup(
     name = "mkdocs-material",
     version = package["version"],
     url = package["homepage"],
+    project_urls = {
+        "Source": "https://github.com/squidfunk/mkdocs-material",
+    },
     license = package["license"],
     description = package["description"],
     long_description = long_description,
@@ -58,12 +61,17 @@ setup(
         "Topic :: Software Development :: Documentation",
         "Topic :: Text Processing :: Markup :: HTML"
     ],
-    packages = find_packages(exclude = ["src"]),
+    packages = find_packages(exclude = ["src", "src.*"]),
     include_package_data = True,
     install_requires = install_requires,
+    python_requires='>=3.6',
     entry_points = {
         "mkdocs.themes": [
-            "material = material",
+            "material = material"
+        ],
+        "mkdocs.plugins": [
+            "search = material.plugins.search.plugin:SearchPlugin",
+            "tags = material.plugins.tags.plugin:TagsPlugin"
         ]
     },
     zip_safe = False

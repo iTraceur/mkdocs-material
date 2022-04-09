@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+ * Copyright (c) 2016-2022 Martin Donath <martin.donath@squidfunk.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -23,23 +23,24 @@
 import {
   Observable,
   Subject,
-  animationFrameScheduler,
-  combineLatest
-} from "rxjs"
-import {
   bufferCount,
+  combineLatest,
   distinctUntilChanged,
   distinctUntilKeyChanged,
+  endWith,
   finalize,
   map,
-  observeOn,
+  repeat,
+  skip,
+  takeLast,
+  takeUntil,
   tap
-} from "rxjs/operators"
+} from "rxjs"
 
-import { resetBackToTopState, setBackToTopState } from "~/actions"
 import { Viewport } from "~/browser"
 
 import { Component } from "../_"
+import { Header } from "../header"
 import { Main } from "../main"
 
 /* ----------------------------------------------------------------------------
@@ -50,7 +51,7 @@ import { Main } from "../main"
  * Back-to-top button
  */
 export interface BackToTop {
-  hidden: boolean                      /* User scrolled up */
+  hidden: boolean                      /* Back-to-top button is hidden */
 }
 
 /* ----------------------------------------------------------------------------
@@ -63,6 +64,7 @@ export interface BackToTop {
 interface WatchOptions {
   viewport$: Observable<Viewport>      /* Viewport observable */
   main$: Observable<Main>              /* Main area observable */
+  target$: Observable<HTMLElement>     /* Location target observable */
 }
 
 /**
@@ -70,7 +72,9 @@ interface WatchOptions {
  */
 interface MountOptions {
   viewport$: Observable<Viewport>      /* Viewport observable */
+  header$: Observable<Header>          /* Header observable */
   main$: Observable<Main>              /* Main area observable */
+  target$: Observable<HTMLElement>     /* Location target observable */
 }
 
 /* ----------------------------------------------------------------------------
@@ -86,7 +90,7 @@ interface MountOptions {
  * @returns Back-to-top observable
  */
 export function watchBackToTop(
-  _el: HTMLElement, { viewport$, main$ }: WatchOptions
+  _el: HTMLElement, { viewport$, main$, target$ }: WatchOptions
 ): Observable<BackToTop> {
 
   /* Compute direction */
@@ -94,25 +98,25 @@ export function watchBackToTop(
     .pipe(
       map(({ offset: { y } }) => y),
       bufferCount(2, 1),
-      map(([a, b]) => a > b),
+      map(([a, b]) => a > b && b > 0),
       distinctUntilChanged()
     )
 
-  /* Compute whether button should be hidden */
-  const hidden$ = main$
+  /* Compute whether main area is active */
+  const active$ = main$
     .pipe(
-      distinctUntilKeyChanged("active")
+      map(({ active }) => active)
     )
 
   /* Compute threshold for hiding */
-  return combineLatest([hidden$, direction$])
+  return combineLatest([active$, direction$])
     .pipe(
-      map(([{ active }, direction]) => ({
-        hidden: !(active && direction)
-      })),
-      distinctUntilChanged((a, b) => (
-        a.hidden === b.hidden
-      ))
+      map(([active, direction]) => !(active && direction)),
+      distinctUntilChanged(),
+      takeUntil(target$.pipe(skip(1))),
+      endWith(true),
+      repeat({ delay: 250 }),
+      map(hidden => ({ hidden }))
     )
 }
 
@@ -127,34 +131,46 @@ export function watchBackToTop(
  * @returns Back-to-top component observable
  */
 export function mountBackToTop(
-  el: HTMLElement, options: MountOptions
+  el: HTMLElement, { viewport$, header$, main$, target$ }: MountOptions
 ): Observable<Component<BackToTop>> {
-  const internal$ = new Subject<BackToTop>()
-  internal$
+  const push$ = new Subject<BackToTop>()
+  push$.subscribe({
+
+    /* Handle emission */
+    next({ hidden }) {
+      if (hidden) {
+        el.setAttribute("data-md-state", "hidden")
+        el.setAttribute("tabindex", "-1")
+        el.blur()
+      } else {
+        el.removeAttribute("data-md-state")
+        el.removeAttribute("tabindex")
+      }
+    },
+
+    /* Handle complete */
+    complete() {
+      el.style.top = ""
+      el.setAttribute("data-md-state", "hidden")
+      el.removeAttribute("tabindex")
+    }
+  })
+
+  /* Watch header height */
+  header$
     .pipe(
-      observeOn(animationFrameScheduler)
+      takeUntil(push$.pipe(endWith(0), takeLast(1))),
+      distinctUntilKeyChanged("height")
     )
-      .subscribe({
-
-        /* Update state */
-        next({ hidden }) {
-          if (hidden)
-            setBackToTopState(el, "hidden")
-          else
-            resetBackToTopState(el)
-        },
-
-        /* Reset on complete */
-        complete() {
-          resetBackToTopState(el)
-        }
+      .subscribe(({ height }) => {
+        el.style.top = `${height + 16}px`
       })
 
   /* Create and return component */
-  return watchBackToTop(el, options)
+  return watchBackToTop(el, { viewport$, main$, target$ })
     .pipe(
-      tap(internal$),
-      finalize(() => internal$.complete()),
+      tap(state => push$.next(state)),
+      finalize(() => push$.complete()),
       map(state => ({ ref: el, ...state }))
     )
 }

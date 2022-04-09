@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+ * Copyright (c) 2016-2022 Martin Donath <martin.donath@squidfunk.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -28,16 +28,14 @@ import {
   from,
   fromEvent,
   identity,
-  defer,
-  of
-} from "rxjs"
-import {
   catchError,
-  mapTo,
+  defer,
+  map,
   mergeWith,
+  of,
   switchMap,
   tap
-} from "rxjs/operators"
+} from "rxjs"
 import glob from "tiny-glob"
 
 /* ----------------------------------------------------------------------------
@@ -110,7 +108,7 @@ export function resolve(
   return from(glob(pattern, options))
     .pipe(
       catchError(() => EMPTY),
-      switchMap(files => from(files)),
+      switchMap(files => files),
       options?.watch
         ? mergeWith(watch(pattern, options))
         : identity
@@ -128,7 +126,10 @@ export function resolve(
 export function watch(
   pattern: string, options: WatchOptions
 ): Observable<string> {
-  return fromEvent(chokidar.watch(pattern, options), "change")
+  return fromEvent(
+    chokidar.watch(pattern, options),
+    "change"
+  ) as Observable<string>
 }
 
 /* ------------------------------------------------------------------------- */
@@ -143,7 +144,7 @@ export function watch(
 export function mkdir(directory: string): Observable<string> {
   return defer(() => fs.mkdir(directory, { recursive: true }))
     .pipe(
-      mapTo(directory)
+      map(() => directory)
     )
 }
 
@@ -175,7 +176,7 @@ export function write(file: string, data: string): Observable<string> {
     cache.set(file, data)
     return defer(() => fs.writeFile(file, data))
       .pipe(
-        mapTo(file),
+        map(() => file),
         process.argv.includes("--verbose")
           ? tap(file => console.log(`${now()} + ${file}`))
           : identity

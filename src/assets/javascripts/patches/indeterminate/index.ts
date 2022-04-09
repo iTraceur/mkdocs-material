@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+ * Copyright (c) 2016-2022 Martin Donath <martin.donath@squidfunk.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,15 +20,16 @@
  * IN THE SOFTWARE.
  */
 
-import { Observable, fromEvent, of } from "rxjs"
 import {
-  mapTo,
+  Observable,
+  fromEvent,
+  map,
   mergeMap,
   switchMap,
   takeWhile,
   tap,
   withLatestFrom
-} from "rxjs/operators"
+} from "rxjs"
 
 import { getElements } from "~/browser"
 
@@ -41,7 +42,7 @@ import { getElements } from "~/browser"
  */
 interface PatchOptions {
   document$: Observable<Document>      /* Document observable */
-  tablet$: Observable<boolean>         /* Tablet breakpoint observable */
+  tablet$: Observable<boolean>         /* Media tablet observable */
 }
 
 /* ----------------------------------------------------------------------------
@@ -61,9 +62,9 @@ export function patchIndeterminate(
 ): void {
   document$
     .pipe(
-      switchMap(() => of(...getElements<HTMLInputElement>(
+      switchMap(() => getElements<HTMLInputElement>(
         "[data-md-state=indeterminate]"
-      ))),
+      )),
       tap(el => {
         el.indeterminate = true
         el.checked = false
@@ -71,7 +72,7 @@ export function patchIndeterminate(
       mergeMap(el => fromEvent(el, "change")
         .pipe(
           takeWhile(() => el.hasAttribute("data-md-state")),
-          mapTo(el)
+          map(() => el)
         )
       ),
       withLatestFrom(tablet$)

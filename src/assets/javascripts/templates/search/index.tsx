@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+ * Copyright (c) 2016-2022 Martin Donath <martin.donath@squidfunk.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,11 +20,13 @@
  * IN THE SOFTWARE.
  */
 
-import { translation } from "~/_"
+import { ComponentChild } from "preact"
+
+import { feature, translation } from "~/_"
 import {
   SearchDocument,
   SearchMetadata,
-  SearchResult
+  SearchResultItem
 } from "~/integrations/search"
 import { h, truncate } from "~/utilities"
 
@@ -61,14 +63,22 @@ function renderSearchDocument(
   /* Render missing query terms */
   const missing = Object.keys(document.terms)
     .filter(key => !document.terms[key])
-    .map(key => [<del>{key}</del>, " "])
-    .flat()
+    .reduce<ComponentChild[]>((list, key) => [
+      ...list, <del>{key}</del>, " "
+    ], [])
     .slice(0, -1)
 
+  /* Assemble query string for highlighting */
+  const url = new URL(document.location)
+  if (feature("search.highlight"))
+    url.searchParams.set("h", Object.entries(document.terms)
+      .filter(([, match]) => match)
+      .reduce((highlight, [value]) => `${highlight} ${value}`.trim(), "")
+    )
+
   /* Render article or section, depending on flags */
-  const url = document.location
   return (
-    <a href={url} class="md-search-result__link" tabIndex={-1}>
+    <a href={`${url}`} class="md-search-result__link" tabIndex={-1}>
       <article
         class={["md-search-result__article", ...parent
           ? ["md-search-result__article--document"]
@@ -83,6 +93,9 @@ function renderSearchDocument(
             {truncate(document.text, 320)}
           </p>
         }
+        {document.tags && document.tags.map(tag => (
+          <span class="md-tag">{tag}</span>
+        ))}
         {teaser > 0 && missing.length > 0 &&
           <p class="md-search-result__terms">
             {translation("search.result.term.missing")}: {...missing}
@@ -104,8 +117,8 @@ function renderSearchDocument(
  *
  * @returns Element
  */
-export function renderSearchResult(
-  result: SearchResult
+export function renderSearchResultItem(
+  result: SearchResultItem
 ): HTMLElement {
   const threshold = result[0].score
   const docs = [...result]

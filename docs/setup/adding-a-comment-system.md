@@ -4,82 +4,104 @@ template: overrides/main.html
 
 # Adding a comment system
 
-Material for MkDocs is natively integrated with [Disqus][1], a comment system
-that provides a wide range of features like social integrations, user profiles,
-as well as spam and moderation tools. Of course, other comment systems can be 
-integrated, too.
+Material for MkDocs allows to easily add the third-party comment system of your
+choice to the footer of any page by using [theme extension]. As an example,
+we'll be integrating [Giscus], which is Open Source, free, and uses GitHub
+discussions as a backend.
 
-  [1]: https://disqus.com/
-
-## Configuration
-
-### Disqus
-
-[:octicons-file-code-24: Source][2] ·
-:octicons-milestone-24: Default: _none_
-
-First, ensure you've set [`site_url`][3] in `mkdocs.yml`. Then, to integrate
-Material for MkDocs with [Disqus][1], create an account and a site giving you a
-[shortname][4], and add it to `mkdocs.yml`:
-
-``` yaml
-extra:
-  disqus: <shortname>
-```
-
-This will insert a comment system on _every page, except the index page_.
-
-  [2]: https://github.com/squidfunk/mkdocs-material/blob/master/src/partials/integrations/disqus.html
-  [3]: https://www.mkdocs.org/user-guide/configuration/#site_url
-  [4]: https://help.disqus.com/en/articles/1717111-what-s-a-shortname
+  [Giscus]: https://giscus.app/
 
 ## Customization
 
-### Selective integration
+### Giscus integration
 
-[:octicons-file-code-24: Source][2] ·
-:octicons-note-24: Metadata ·
-:octicons-mortar-board-24: Difficulty: _easy_
+Before you can use [Giscus], you need to complete the following steps:
 
-If the [Metadata][5] extension is enabled, you can disable or enable Disqus for
-specific pages by adding the following to the front matter of a page:
+1.  __Install the [Giscus GitHub App]__ and grant access to the repository
+    that should host comments as GitHub discussions. Note that this can be a
+    repository different from your documentation.
+2.  __Visit [Giscus] and generate the snippet__ through their configuration tool
+    to load the comment system. Copy the snippet for the next step. The
+    resulting snippet should look similar to this:
 
-=== "Enable Disqus"
-
-    ``` yaml
-    ---
-    disqus: <shortname>
-    ---
-
-    ...
+    ``` html
+    <script
+      src="https://giscus.app/client.js"
+      data-repo="<username>/<repository>"
+      data-repo-id="..."
+      data-category="..."
+      data-category-id="..."
+      data-mapping="pathname"
+      data-reactions-enabled="1"
+      data-emit-metadata="1"
+      data-theme="light"
+      data-lang="en"
+      crossorigin="anonymous"
+      async
+    >
+    </script>
     ```
 
-=== "Disable Disqus"
+You can either integrate [Giscus] on every page by overriding the `main.html`
+template, or create a new template (e.g. `blog.html`) to extend from `main.html`
+which includes the comment system, so you can decide for each page whether you
+want to allow comments or not.
 
-    ``` yaml
-    ---
-    disqus: ""
-    ---
+In order to integrate [Giscus], follow the guide on [theme extension] and
+[override the `content` block][overriding blocks], extending the default by
+calling the `super()` function at the beginning of the block:
 
-    ...
-    ```
+``` html hl_lines="8"
+{% extends "base.html" %}
 
-  [5]: ../../reference/meta-tags/#metadata
+{% block content %}
+  {{ super() }}
 
-### Other comment systems
+  <!-- Giscus -->
+  <h2 id="__comments">{{ lang.t("meta.comments") }}</h2>
+  <!-- Replace with generated snippet -->
 
-[:octicons-file-code-24: Source][6] ·
-:octicons-mortar-board-24: Difficulty: _easy_
+  <!-- Reload on palette change -->
+  <script>
+    var palette = __md_get("__palette")
+    if (palette && typeof palette.color === "object")
+      if (palette.color.scheme === "slate") {
+        var giscus = document.querySelector("script[src*=giscus]")
+        giscus.setAttribute("data-theme", "dark") // (1)!
+      }
 
-In order to integrate another JavaScript-based comment system provider, you can
-[extend the theme][7] and [override the `disqus` block][8]:
+    /* Register event handlers after documented loaded */
+    document.addEventListener("DOMContentLoaded", function() {
+      var ref = document.querySelector("[data-md-component=palette]")
+      ref.addEventListener("change", function() {
+        var palette = __md_get("__palette")
+        if (palette && typeof palette.color === "object") {
+          var theme = palette.color.scheme === "slate" ? "dark" : "light"
 
-``` html
-{% block disqus %}
-  <!-- Add custom comment system integration here -->
+          /* Instruct Giscus to change theme */
+          var frame = document.querySelector(".giscus-frame")
+          frame.contentWindow.postMessage(
+            { giscus: { setConfig: { theme } } },
+            "https://giscus.app"
+          )
+        }
+      })
+    })
+  </script>
 {% endblock %}
 ```
 
-  [6]: https://github.com/squidfunk/mkdocs-material/blob/master/src/base.html
-  [7]: ../customization.md#extending-the-theme
-  [8]: ../customization.md#overriding-blocks-recommended
+1.  This code block ensures that [Giscus] renders with a dark theme when the
+    palette is set to `slate`. Note that multiple dark themes are available,
+    so you can change it to your liking.
+
+Replace the highlighted line with the snippet you generated with the [Giscus]
+configuration tool in the previous step. If you extended `main.html`, you should
+now see the [Giscus] comment system at the bottom of each page. If you created
+a new, separate template, you can enable Giscus by [setting the page template]
+via front matter.
+
+  [Giscus GitHub App]: https://github.com/apps/giscus
+  [theme extension]: ../customization.md#extending-the-theme
+  [overriding blocks]: ../customization.md#overriding-blocks
+  [setting the page template]: ../reference/index.md#setting-the-page-template

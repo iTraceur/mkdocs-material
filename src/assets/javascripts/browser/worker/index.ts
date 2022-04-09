@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+ * Copyright (c) 2016-2022 Martin Donath <martin.donath@squidfunk.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,14 +20,16 @@
  * IN THE SOFTWARE.
  */
 
-import { Observable, Subject, fromEvent } from "rxjs"
 import {
+  Observable,
+  Subject,
+  fromEvent,
   map,
   share,
-  switchMapTo,
+  switchMap,
   tap,
   throttle
-} from "rxjs/operators"
+} from "rxjs"
 
 /* ----------------------------------------------------------------------------
  * Types
@@ -98,7 +100,7 @@ export function watchWorker<T extends WorkerMessage>(
     .pipe(
       throttle(() => rx$, { leading: true, trailing: true }),
       tap(message => worker.postMessage(message)),
-      switchMapTo(rx$),
+      switchMap(() => rx$),
       share()
     )
 }

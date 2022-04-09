@@ -33,6 +33,9 @@
     <strong>Twitter</strong>
   </a>
 {% endblock %}
+{% block content %}
+  {% include "overrides/partials/content.html" %}
+{% endblock %}
 {% block scripts %}
   {{ super() }}
   <script src="{{ 'overrides/assets/javascripts/bundle.0c1e7329.min.js' | url }}"></script>

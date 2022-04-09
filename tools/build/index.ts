@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+ * Copyright (c) 2016-2022 Martin Donath <martin.donath@squidfunk.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -22,21 +22,22 @@
 
 import { minify as minhtml } from "html-minifier"
 import * as path from "path"
-import { concat, defer, EMPTY, merge, of, zip } from "rxjs"
 import {
+  EMPTY,
+  concat,
   concatMap,
+  defer,
   map,
+  merge,
+  of,
   reduce,
   scan,
   startWith,
   switchMap,
-  switchMapTo,
-  toArray
-} from "rxjs/operators"
-import {
-  extendDefaultPlugins,
-  optimize
-} from "svgo"
+  toArray,
+  zip
+} from "rxjs"
+import { optimize } from "svgo"
 
 import { IconSearchIndex } from "_/components"
 
@@ -86,10 +87,11 @@ function ext(file: string, extension: string): string {
  */
 function minsvg(data: string): string {
   const result = optimize(data, {
-    plugins: extendDefaultPlugins([
+    plugins: [
+      "preset-default",
       { name: "removeDimensions", active: true },
       { name: "removeViewBox", active: false }
-    ])
+    ]
   })
   return result.data || data
 }
@@ -125,15 +127,15 @@ const assets$ = concat(
       transform: async data => minsvg(data)
     })),
 
-  /* Copy Lunr.js search stemmers and segmenter */
-  ...["min/*.js", "tinyseg.js"]
+  /* Copy Lunr.js search stemmers and segmenters */
+  ...["min/*.js", "tinyseg.js", "wordcut.js"]
     .map(pattern => copyAll(pattern, {
       from: "node_modules/lunr-languages",
       to: `${base}/assets/javascripts/lunr`
     })),
 
   /* Copy images and configurations */
-  ...[".icons/*.svg", "assets/images/*", "**/*.{py,yml}"]
+  ...[".icons/*.svg", "assets/images/*", "**/*.yml"]
     .map(pattern => copyAll(pattern, {
       from: "src",
       to: base
@@ -160,6 +162,13 @@ const assets$ = concat(
       to: base
     }))
 )
+
+/* Copy plugins and extensions */
+const sources$ = copyAll("**/*.py", {
+  from: "src",
+  to: base,
+  watch: process.argv.includes("--watch")
+})
 
 /* ------------------------------------------------------------------------- */
 
@@ -200,7 +209,7 @@ const manifest$ = merge(
       )
         .pipe(
           startWith("*"),
-          switchMapTo(observable$.pipe(toArray()))
+          switchMap(() => observable$.pipe(toArray()))
         )
     ))
 )
@@ -303,6 +312,57 @@ const index$ = zip(icons$, emojis$)
     ))
   )
 
+/* ------------------------------------------------------------------------- */
+
+/* Build schema */
+const schema$ = merge(
+
+  /* Compute fonts schema */
+  defer(() => import("google-fonts-complete"))
+    .pipe(
+      map(({ default: fonts }) => Object.keys(fonts)),
+      map(fonts => ({
+        "$schema": "https://json-schema.org/draft-07/schema",
+        "title": "Google Fonts",
+        "markdownDescription": "https://fonts.google.com/",
+        "type": "string",
+        "oneOf": fonts.map(font => ({
+          "title": font,
+          "markdownDescription": `https://fonts.google.com/specimen/${
+            font.replace(/\s+/g, "+")
+          }`,
+          "enum": [
+            font
+          ],
+        }))
+      })),
+      switchMap(data => write(
+        "docs/schema/assets/fonts.json",
+        JSON.stringify(data, undefined, 2)
+      ))
+    ),
+
+  /* Compute icons schema */
+  icons$
+    .pipe(
+      map(icons => [...icons.values()]),
+      map(icons => ({
+        "$schema": "https://json-schema.org/draft-07/schema",
+        "title": "Icon",
+        "markdownDescription": [
+          "https://squidfunk.github.io/mkdocs-material",
+          "reference/icons-emojis/#search"
+        ].join("/"),
+        "type": "string",
+        "enum": icons.map(icon => icon.replace(".svg", ""))
+      })),
+      switchMap(data => write(
+        "docs/schema/assets/icons.json",
+        JSON.stringify(data, undefined, 2)
+      ))
+    )
+)
+
 /* ----------------------------------------------------------------------------
  * Program
  * ------------------------------------------------------------------------- */
@@ -310,8 +370,8 @@ const index$ = zip(icons$, emojis$)
 /* Assemble pipeline */
 const build$ =
   process.argv.includes("--dirty")
-    ? templates$
-    : concat(assets$, merge(templates$, index$))
+    ? merge(templates$, sources$)
+    : concat(assets$, merge(templates$, sources$, index$, schema$))
 
 /* Let's get rolling */
 build$.subscribe()

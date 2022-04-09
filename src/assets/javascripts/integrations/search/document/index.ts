@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+ * Copyright (c) 2016-2022 Martin Donath <martin.donath@squidfunk.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -61,9 +61,10 @@ export function setupSearchDocumentMap(
   for (const doc of docs) {
     const [path, hash] = doc.location.split("#")
 
-    /* Extract location and title */
+    /* Extract location, title and tags */
     const location = doc.location
     const title    = doc.title
+    const tags     = doc.tags
 
     /* Escape and cleanup text */
     const text = escapeHTML(doc.text)
@@ -97,7 +98,8 @@ export function setupSearchDocumentMap(
       documents.set(location, {
         location,
         title,
-        text
+        text,
+        ...tags && { tags }
       })
     }
   }

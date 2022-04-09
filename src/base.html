@@ -1,5 +1,5 @@
 <!--
-  Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+  Copyright (c) 2016-2022 Martin Donath <martin.donath@squidfunk.com>
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to
@@ -26,7 +26,7 @@
 <html lang="{{ lang.t('language') }}" class="no-js">
   <head>
 
-    <!-- Metatags -->
+    <!-- Meta tags -->
     {% block site_meta %}
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -36,13 +36,6 @@
         <meta name="description" content="{{ page.meta.description }}" />
       {% elif config.site_description %}
         <meta name="description" content="{{ config.site_description }}" />
-      {% endif %}
-
-      <!-- Page keywords -->
-      {% if page and page.meta and page.meta.keywords %}
-        <meta name="keywords" content="{{ page.meta.keywords }}" />
-      {% elif config.site_keywords %}
-        <meta name="keywords" content="{{ config.site_keywords }}" />
       {% endif %}
 
       <!-- Page author -->
@@ -78,7 +71,7 @@
       {% endif %}
     {% endblock %}
 
-    <!-- Theme-related stylesheets -->
+    <!-- Theme-related style sheets -->
     {% block styles %}
       <link rel="stylesheet" href="{{ 'assets/stylesheets/main.css' | url }}" />
 
@@ -113,26 +106,20 @@
         <link rel="stylesheet" href="{{ 'assets/stylesheets/roboto-fonts.css' | url }}">
         <style>
           :root {
-            --md-text-font-family: "{{ font.text }}";
-            --md-code-font-family: "{{ font.code }}";
+            --md-text-font: "{{ text }}";
+            --md-code-font: "{{ code }}";
           }
         </style>
       {% endif %}
     {% endblock %}
 
-    <!-- Progressive Web App Manifest -->
-    {% if config.extra.manifest %}
-      <link
-        rel="manifest"
-        href="{{ config.extra.manifest | url }}"
-        crossorigin="use-credentials"
-      />
-    {% endif %}
-
-    <!-- Custom stylesheets -->
+    <!-- Custom style sheets -->
     {% for path in config["extra_css"] %}
       <link rel="stylesheet" href="{{ path | url }}" />
     {% endfor %}
+
+    <!-- Helper functions for inline scripts -->
+    {% include "partials/javascripts/base.html" %}
 
     <!-- Analytics -->
     {% block analytics %}
@@ -170,7 +157,6 @@
 
     <!-- Retrieve features from configuration -->
     {% set features = config.theme.features or [] %}
-    {% include "partials/javascripts/base.html" %}
 
     <!-- User preference: color palette -->
     {% if not config.theme.palette is mapping %}
@@ -212,13 +198,27 @@
     <!-- Announcement bar -->
     <div data-md-component="announce">
       {% if self.announce() %}
-        <aside class="md-announce">
-          <div class="md-announce__inner md-grid md-typeset">
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
             {% block announce %}{% endblock %}
           </div>
         </aside>
       {% endif %}
     </div>
+
+    <!-- Version warning -->
+    {% if config.extra.version %}
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          {% if self.outdated() %}
+            <div class="md-banner__inner md-grid md-typeset">
+              {% block outdated %}{% endblock %}
+            </div>
+            {% include "partials/javascripts/outdated.html" %}
+          {% endif %}
+        </aside>
+      </div>
+    {% endif %}
 
     <!-- Header -->
     {% block header %}
@@ -231,10 +231,12 @@
       <!-- Hero teaser -->
       {% block hero %}{% endblock %}
 
-      <!-- Navigation tabs -->
+      <!-- Navigation tabs (collapsing) -->
       {% block tabs %}
-        {% if "navigation.tabs" in features %}
-          {% include "partials/tabs.html" %}
+        {% if not "navigation.tabs.sticky" in features %}
+          {% if "navigation.tabs" in features %}
+            {% include "partials/tabs.html" %}
+          {% endif %}
         {% endif %}
       {% endblock %}
 
@@ -265,7 +267,7 @@
             {% endif %}
 
             <!-- Table of contents -->
-            {% if page.toc and not "toc.integrate" in features %}
+            {% if not "toc.integrate" in features %}
               {% if page and page.meta and page.meta.hide %}
                 {% set hidden = "hidden" if "toc" in page.meta.hide %}
               {% endif %}
@@ -284,11 +286,9 @@
             {% endif %}
           {% endblock %}
 
-          <!-- Article -->
+          <!-- Page content -->
           <div class="md-content" data-md-component="content">
             <article class="md-content__inner md-typeset">
-
-              <!-- Content -->
               {% block content %}
 
                 <!-- Edit button -->
@@ -400,11 +400,11 @@
           <a
             href="#"
             class="md-top md-icon"
-            title="{{ lang.t('top.title') }}"
             data-md-component="top"
             data-md-state="hidden"
           >
             {% include ".icons/material/arrow-up.svg" %}
+            {{ lang.t('top.title') }}
           </a>
         {% endif %}
       </main>
@@ -426,9 +426,13 @@
         "base": base_url,
         "features": features,
         "translations": {},
-        "search": "assets/javascripts/workers/search.js" | url,
-        "version": config.extra.version or None
+        "search": "assets/javascripts/workers/search.js" | url
       } -%}
+
+      <!-- Versioning -->
+      {%- if config.extra.version -%}
+        {%- set _ = app.update({ "version": config.extra.version }) -%}
+      {%- endif -%}
 
       <!-- Translations -->
       {%- set translations = app.translations -%}
@@ -445,7 +449,8 @@
         "search.result.other",
         "search.result.more.one",
         "search.result.more.other",
-        "search.result.term.missing"
+        "search.result.term.missing",
+        "select.version.title"
       ] -%}
         {%- set _ = translations.update({ key: lang.t(key) }) -%}
       {%- endfor -%}

@@ -1,5 +1,6 @@
 ---
 template: overrides/main.html
+icon: material/tab
 ---
 
 # Content tabs
@@ -11,138 +12,35 @@ grouping code blocks and other content.
 
 ## Configuration
 
-### Tabbed
-
-[:octicons-file-code-24: Source][1] · [:octicons-workflow-24: Extension][2]
-
-The [Tabbed][2] extension, which is part of [Python Markdown Extensions][3],
-integrates with Material for MkDocs and can be enabled via `mkdocs.yml`:
-
-``` yaml
-markdown_extensions:
-  - pymdownx.tabbed
-```
-
-  [1]: https://github.com/squidfunk/mkdocs-material/blob/master/src/assets/stylesheets/main/extensions/pymdownx/_tabbed.scss
-  [2]: https://facelessuser.github.io/pymdown-extensions/extensions/tabbed/
-  [3]: https://facelessuser.github.io/pymdown-extensions/
-
-### SuperFences
-
-The [SuperFences][4] extension, which is also part of [Python Markdown
-Extensions][3], allows for the __nesting of code and content blocks inside
-tabs__, and is therefore strongly recommended:
+This configuration enables content tabs, and allows to nest arbitrary content
+inside content tabs, including code blocks and ... more content tabs! Add the 
+following lines to `mkdocs.yml`:
 
 ``` yaml
 markdown_extensions:
   - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true 
 ```
 
-  [4]: https://facelessuser.github.io/pymdown-extensions/extensions/superfences/
+See additional configuration options:
 
-## Usage
+- [SuperFences]
+- [Tabbed]
 
-### Grouping code blocks
+  [SuperFences]: ../setup/extensions/python-markdown-extensions.md#superfences
+  [Tabbed]: ../setup/extensions/python-markdown-extensions.md#tabbed
 
-Code blocks are one of the primary targets to be grouped, and can be considered
-a special case of content tabs, as tabs with a single code block are always
-rendered without horizontal spacing.
+### Linked content tabs
 
-_Example_:
+[:octicons-heart-fill-24:{ .mdx-heart } Insiders][Insiders]{ .mdx-insiders } ·
+[:octicons-tag-24: insiders-2.9.0][Insiders] ·
+:octicons-unlock-24: Feature flag ·
+:octicons-beaker-24: Experimental
 
-```
-=== "C"
-
-    ``` c
-    #include <stdio.h>
-
-    int main(void) {
-      printf("Hello world!\n");
-      return 0;
-    }
-    ```
-
-=== "C++"
-
-    ``` c++
-    #include <iostream>
-
-    int main(void) {
-      std::cout << "Hello world!" << std::endl;
-      return 0;
-    }
-    ```
-```
-
-_Result_:
-
-=== "C"
-
-    ``` c
-    #include <stdio.h>
-
-    int main(void) {
-      printf("Hello world!\n");
-      return 0;
-    }
-    ```
-
-=== "C++"
-
-    ``` c++
-    #include <iostream>
-
-    int main(void) {
-      std::cout << "Hello world!" << std::endl;
-      return 0;
-    }
-    ```
-
-### Grouping other content
-
-When a content tab contains more than one code block, it is rendered with
-horizontal spacing. Vertical spacing is never added, but can be achieved
-by nesting tabs in other blocks.
-
-_Example_:
-
-```
-=== "Unordered list"
-
-    * Sed sagittis eleifend rutrum
-    * Donec vitae suscipit est
-    * Nulla tempor lobortis orci
-
-=== "Ordered list"
-
-    1. Sed sagittis eleifend rutrum
-    2. Donec vitae suscipit est
-    3. Nulla tempor lobortis orci
-```
-
-_Result_:
-
-=== "Unordered list"
-
-    * Sed sagittis eleifend rutrum
-    * Donec vitae suscipit est
-    * Nulla tempor lobortis orci
-
-=== "Ordered list"
-
-    1. Sed sagittis eleifend rutrum
-    2. Donec vitae suscipit est
-    3. Nulla tempor lobortis orci
-
-### Linking content tabs
-
-[:octicons-file-code-24: Source][5] ·
-:octicons-beaker-24: Experimental ·
-[:octicons-heart-fill-24:{ .mdx-heart } Insiders only][5]{ .mdx-insiders }
-
-When _linking_ is enabled, all content tabs on a page will be linked and show
-the same active tab when the user clicks on a label. Add the following lines
-to `mkdocs.yml`:
+When enabled, all content tabs across the whole documentation site will be
+linked and switch to the same label when the user clicks on a tab. Add the 
+following lines to `mkdocs.yml`:
 
 ``` yaml
 theme:
@@ -153,101 +51,161 @@ theme:
 Content tabs are linked based on their label, not offset. This means that all
 tabs with the same label will be activated when a user clicks a content tab
 regardless of order inside a container. Furthermore, this feature is fully
-integrated with [instant loading][6] and persisted across page loads.
+integrated with [instant loading] and persisted across page loads.
 
-=== "With linking"
+=== ":octicons-check-circle-fill-16: Enabled"
 
-    [![With linking][7]][7]
+    [![content.tabs.link enabled]][content.tabs.link enabled]
 
-=== "Without linking"
+=== ":octicons-skip-16: Disabled"
 
-    [![Without linking][8]][8]
+    [![content.tabs.link disabled]][content.tabs.link disabled]
 
-  [5]: ../insiders/index.md
-  [6]: ../setup/setting-up-navigation.md#instant-loading
-  [7]: ../assets/screenshots/content-tabs-link.png
-  [8]: ../assets/screenshots/content-tabs.png
+  [Insiders]: ../insiders/index.md
+  [instant loading]: ../setup/setting-up-navigation.md#instant-loading
+  [content.tabs.link enabled]: ../assets/screenshots/content-tabs-link.png
+  [content.tabs.link disabled]: ../assets/screenshots/content-tabs.png
+
+## Usage
+
+### Grouping code blocks
+
+Code blocks are one of the primary targets to be grouped, and can be considered
+a special case of content tabs, as tabs with a single code block are always
+rendered without horizontal spacing:
+
+``` title="Content tabs with code blocks"
+=== "C"
+
+    ``` c
+    #include <stdio.h>
+
+    int main(void) {
+      printf("Hello world!\n");
+      return 0;
+    }
+    ```
+
+=== "C++"
+
+    ``` c++
+    #include <iostream>
+
+    int main(void) {
+      std::cout << "Hello world!" << std::endl;
+      return 0;
+    }
+    ```
+```
+
+<div class="result" markdown>
+
+=== "C"
+
+    ``` c
+    #include <stdio.h>
+
+    int main(void) {
+      printf("Hello world!\n");
+      return 0;
+    }
+    ```
+
+=== "C++"
+
+    ``` c++
+    #include <iostream>
+
+    int main(void) {
+      std::cout << "Hello world!" << std::endl;
+      return 0;
+    }
+    ```
+
+</div>
+
+### Grouping other content
+
+When a content tab contains more than one code block, it is rendered with
+horizontal spacing. Vertical spacing is never added, but can be achieved
+by nesting tabs in other blocks:
+
+``` title="Content tabs"
+=== "Unordered list"
+
+    * Sed sagittis eleifend rutrum
+    * Donec vitae suscipit est
+    * Nulla tempor lobortis orci
+
+=== "Ordered list"
+
+    1. Sed sagittis eleifend rutrum
+    2. Donec vitae suscipit est
+    3. Nulla tempor lobortis orci
+```
+
+<div class="result" markdown>
+
+=== "Unordered list"
+
+    * Sed sagittis eleifend rutrum
+    * Donec vitae suscipit est
+    * Nulla tempor lobortis orci
+
+=== "Ordered list"
+
+    1. Sed sagittis eleifend rutrum
+    2. Donec vitae suscipit est
+    3. Nulla tempor lobortis orci
+
+</div>
 
 ### Embedded content
 
-When [SuperFences][9] is enabled, content tabs can contain arbitrary nested
+When [SuperFences] is enabled, content tabs can contain arbitrary nested
 content, including further content tabs, and can be nested in other blocks like
-[admonitions][10], [details][11] or blockquotes:
+[admonitions] or blockquotes:
 
-_Example_:
-
-``` markdown
+``` title="Content tabs in admonition"
 !!! example
 
     === "Unordered List"
 
-        _Example_:
-
-        ``` markdown
+        ``` markdown title="List, unordered"
         * Sed sagittis eleifend rutrum
         * Donec vitae suscipit est
         * Nulla tempor lobortis orci
         ```
-
-        _Result_:
-
-        * Sed sagittis eleifend rutrum
-        * Donec vitae suscipit est
-        * Nulla tempor lobortis orci
 
     === "Ordered List"
 
-        _Example_:
-
-        ``` markdown
+        ``` markdown title="List, ordered"
         1. Sed sagittis eleifend rutrum
         2. Donec vitae suscipit est
         3. Nulla tempor lobortis orci
         ```
-
-        _Result_:
-
-        1. Sed sagittis eleifend rutrum
-        2. Donec vitae suscipit est
-        3. Nulla tempor lobortis orci
 ```
 
-_Result_:
+<div class="result" markdown>
 
 !!! example
 
     === "Unordered List"
 
-        _Example_:
-
-        ``` markdown
+        ``` markdown title="List, unordered"
         * Sed sagittis eleifend rutrum
         * Donec vitae suscipit est
         * Nulla tempor lobortis orci
         ```
-
-        _Result_:
-
-        * Sed sagittis eleifend rutrum
-        * Donec vitae suscipit est
-        * Nulla tempor lobortis orci
 
     === "Ordered List"
 
-        _Example_:
-
-        ``` markdown
+        ``` markdown title="List, ordered"
         1. Sed sagittis eleifend rutrum
         2. Donec vitae suscipit est
         3. Nulla tempor lobortis orci
         ```
 
-        _Result_:
+</div>
 
-        1. Sed sagittis eleifend rutrum
-        2. Donec vitae suscipit est
-        3. Nulla tempor lobortis orci
-
-  [9]: #superfences
-  [10]: admonitions.md
-  [11]: admonitions.md#details
+  [admonitions]: admonitions.md

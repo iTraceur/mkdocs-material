@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+ * Copyright (c) 2016-2022 Martin Donath <martin.donath@squidfunk.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -24,34 +24,25 @@ import { filter as search } from "fuzzaldrin-plus"
 import {
   Observable,
   Subject,
-  animationFrameScheduler,
-  combineLatest,
-  merge,
-  of
-} from "rxjs"
-import {
   bufferCount,
+  combineLatest,
   distinctUntilKeyChanged,
   filter,
   finalize,
   map,
-  observeOn,
+  merge,
+  of,
   switchMap,
   tap,
   withLatestFrom,
   zipWith
-} from "rxjs/operators"
+} from "rxjs"
 
 import {
-  addToSearchResultList,
-  resetSearchResultList,
-  resetSearchResultMeta,
-  setSearchResultMeta
-} from "~/actions"
-import {
-  getElementOrThrow,
-  watchElementThreshold
+  getElement,
+  watchElementBoundary
 } from "~/browser"
+import { round } from "~/utilities"
 
 import { Icon, renderIconSearchResult } from "_/templates"
 
@@ -97,44 +88,76 @@ interface MountOptions {
 /**
  * Watch icon search result
  *
- * @param _el - Icon search result element
+ * @param el - Icon search result element
  * @param options - Options
  *
  * @returns Icon search result observable
  */
 export function watchIconSearchResult(
-  _el: HTMLElement, { index$, query$ }: WatchOptions
+  el: HTMLElement, { index$, query$ }: WatchOptions
 ): Observable<IconSearchResult> {
-  return combineLatest([
-    query$.pipe(distinctUntilKeyChanged("value")),
-    index$
-      .pipe(
-        map(({ icons, emojis }) => [
-          ...Object.keys(icons.data),
-          ...Object.keys(emojis.data)
-        ])
-      )
-  ])
-    .pipe(
-      map(([{ value }, data]) => search(data, value)),
-      switchMap(shortcodes => index$.pipe(
-        map(({ icons, emojis }) => ({
-          data: shortcodes.map<Icon>(shortcode => {
-            const category =
-              shortcode in icons.data
-                ? icons
-                : emojis
-            return {
-              shortcode,
-              url: [
-                category.base,
-                category.data[shortcode]
-              ].join("")
-            }
-          })
-        }))
-      ))
-    )
+  switch (el.getAttribute("data-mdx-mode")) {
+
+    case "file":
+      return combineLatest([
+        query$.pipe(distinctUntilKeyChanged("value")),
+        index$
+          .pipe(
+            map(({ icons }) => Object.values(icons.data)
+              .map(icon => icon.replace(/\.svg$/, ""))
+            )
+          )
+      ])
+        .pipe(
+          map(([{ value }, data]) => search(data, value)),
+          switchMap(files => index$.pipe(
+            map(({ icons }) => ({
+              data: files.map<Icon>(shortcode => {
+                return {
+                  shortcode,
+                  url: [
+                    icons.base,
+                    shortcode,
+                    ".svg"
+                  ].join("")
+                }
+              })
+            }))
+          ))
+        )
+
+    default:
+      return combineLatest([
+        query$.pipe(distinctUntilKeyChanged("value")),
+        index$
+          .pipe(
+            map(({ icons, emojis }) => [
+              ...Object.keys(icons.data),
+              ...Object.keys(emojis.data)
+            ])
+          )
+      ])
+        .pipe(
+          map(([{ value }, data]) => search(data, value)),
+          switchMap(shortcodes => index$.pipe(
+            map(({ icons, emojis }) => ({
+              data: shortcodes.map<Icon>(shortcode => {
+                const category =
+                  shortcode in icons.data
+                    ? icons
+                    : emojis
+                return {
+                  shortcode,
+                  url: [
+                    category.base,
+                    category.data[shortcode]
+                  ].join("")
+                }
+              })
+            }))
+          ))
+        )
+  }
 }
 
 /**
@@ -148,52 +171,67 @@ export function watchIconSearchResult(
 export function mountIconSearchResult(
   el: HTMLElement, { index$, query$ }: MountOptions
 ): Observable<Component<IconSearchResult, HTMLElement>> {
-  const internal$ = new Subject<IconSearchResult>()
-  const boundary$ = watchElementThreshold(el)
+  const push$ = new Subject<IconSearchResult>()
+  const boundary$ = watchElementBoundary(el)
     .pipe(
       filter(Boolean)
     )
 
   /* Update search result metadata */
-  const meta = getElementOrThrow(":scope > :first-child", el)
-  internal$
+  const meta = getElement(":scope > :first-child", el)
+  push$
     .pipe(
-      observeOn(animationFrameScheduler),
       withLatestFrom(query$)
     )
       .subscribe(([{ data }, { value }]) => {
-        if (value)
-          setSearchResultMeta(meta, data.length)
-        else
-          resetSearchResultMeta(meta)
+        if (value) {
+          switch (data.length) {
+
+            /* No results */
+            case 0:
+              meta.textContent = "No matches"
+              break
+
+            /* One result */
+            case 1:
+              meta.textContent = "1 match"
+              break
+
+            /* Multiple result */
+            default:
+              meta.textContent = `${round(data.length)} matches`
+          }
+        } else {
+          meta.textContent = "Type to start searching"
+        }
       })
 
   /* Update icon search result list */
-  const list = getElementOrThrow(":scope > :last-child", el)
-  internal$
+  const file = el.getAttribute("data-mdx-mode") === "file"
+  const list = getElement(":scope > :last-child", el)
+  push$
     .pipe(
-      observeOn(animationFrameScheduler),
-      tap(() => resetSearchResultList(list)),
+      tap(() => list.innerHTML = ""),
       switchMap(({ data }) => merge(
         of(...data.slice(0, 10)),
         of(...data.slice(10))
           .pipe(
             bufferCount(10),
             zipWith(boundary$),
-            switchMap(([chunk]) => of(...chunk))
+            switchMap(([chunk]) => chunk)
           )
       )),
       withLatestFrom(query$)
     )
-      .subscribe(([result, { value }]) => {
-        addToSearchResultList(list, renderIconSearchResult(result, value))
-      })
+      .subscribe(([result, { value }]) => list.appendChild(
+        renderIconSearchResult(result, value, file)
+      ))
 
   /* Create and return component */
   return watchIconSearchResult(el, { query$, index$ })
     .pipe(
-      tap(internal$),
-      finalize(() => internal$.complete()),
+      tap(state => push$.next(state)),
+      finalize(() => push$.complete()),
       map(state => ({ ref: el, ...state }))
     )
 }

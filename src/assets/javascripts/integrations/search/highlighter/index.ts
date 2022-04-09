@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+ * Copyright (c) 2016-2022 Martin Donath <martin.donath@squidfunk.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -19,6 +19,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+
+import escapeHTML from "escape-html"
 
 import { SearchIndexConfig } from "../_"
 
@@ -52,11 +54,12 @@ export type SearchHighlightFactoryFn = (query: string) => SearchHighlightFn
  * Create a search highlighter
  *
  * @param config - Search index configuration
+ * @param escape - Whether to escape HTML
  *
  * @returns Search highlight factory function
  */
 export function setupSearchHighlighter(
-  config: SearchIndexConfig
+  config: SearchIndexConfig, escape: boolean
 ): SearchHighlightFactoryFn {
   const separator = new RegExp(config.separator, "img")
   const highlight = (_: unknown, data: string, term: string) => {
@@ -77,8 +80,12 @@ export function setupSearchHighlighter(
     })`, "img")
 
     /* Highlight string value */
-    return value => value
-      .replace(match, highlight)
-      .replace(/<\/mark>(\s+)<mark[^>]*>/img, "$1")
+    return value => (
+      escape
+        ? escapeHTML(value)
+        : value
+      )
+        .replace(match, highlight)
+        .replace(/<\/mark>(\s+)<mark[^>]*>/img, "$1")
   }
 }
